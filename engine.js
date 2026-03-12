@@ -236,11 +236,10 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
     var cx=rx+rw/2,cy=ry+rh/2;
     var fs=Math.min(9,rw/6,rh/5);if(fs<5)fs=5;
     // 라벨 배경 카드
-    var lbw=fs*rm.name.length*0.7+12,lbh=fs*2.8;
+    var lbw=fs*rm.name.length*0.7+12,lbh=fs*2.2;
     o+='<rect x="'+(cx-lbw/2)+'" y="'+(cy-lbh/2-fs*0.3)+'" width="'+lbw+'" height="'+lbh+'" rx="2" fill="#FFF" opacity="0.75"/>';
-    o+='<text x="'+cx+'" y="'+(cy-fs*0.2)+'" text-anchor="middle" font-family="sans-serif" font-size="'+fs+'" fill="#333" font-weight="600">'+rm.name+'</text>';
-    o+='<text x="'+cx+'" y="'+(cy+fs*0.8)+'" text-anchor="middle" font-family="sans-serif" font-size="'+(fs*0.7)+'" fill="#777">'+aSqm.toFixed(1)+'㎡ ('+aPy+'평)</text>';
-    o+='<text x="'+cx+'" y="'+(cy+fs*1.6)+'" text-anchor="middle" font-family="sans-serif" font-size="'+(fs*0.55)+'" fill="#AAA">'+(rm.w/1000).toFixed(1)+'m × '+(rm.h/1000).toFixed(1)+'m</text>';
+    o+='<text x="'+cx+'" y="'+(cy-fs*0.1)+'" text-anchor="middle" font-family="sans-serif" font-size="'+fs+'" fill="#333" font-weight="600">'+rm.name+'</text>';
+    o+='<text x="'+cx+'" y="'+(cy+fs*0.9)+'" text-anchor="middle" font-family="sans-serif" font-size="'+(fs*0.75)+'" fill="#666" font-weight="500">'+aPy+'평</text>';
   }
 
   // 치수선 — 건물
