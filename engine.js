@@ -106,6 +106,7 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
     row.items.forEach(function(it,ci){
       laid.push({name:it.spec.name,type:inferType(it.spec.name),
         x:EW+it.x,y:EW+row.y,w:it.w,h:row.h,
+        specW:it.spec.width*1000,specH:it.spec.height*1000,
         isTop:ri2===0,isBot:ri2===rows.length-1,
         isLeft:ci===0,isRight:ci===row.items.length-1});
     });
@@ -231,7 +232,8 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
   for(var i=0;i<laid.length;i++){
     var rm=laid[i],z=zc(rm.type);
     var rx=px(rm.x)+ox,ry=px(rm.y)+oy,rw=px(rm.w),rh=px(rm.h);
-    var aSqm=(rm.w/1000)*(rm.h/1000),aPy=(aSqm/3.306).toFixed(1);
+    var sw=rm.specW||rm.w,sh=rm.specH||rm.h;
+    var aSqm=(sw/1000)*(sh/1000),aPy=(aSqm/3.306).toFixed(1);
     var cx=rx+rw/2,cy=ry+rh/2;
     var fs=Math.min(9,rw/6,rh/5);if(fs<5)fs=5;
     // 라벨 배경 카드
@@ -254,7 +256,8 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
   o+='<line x1="'+(rsx-3)+'" y1="'+(ly+11)+'" x2="'+(rsx+35)+'" y2="'+(ly+11)+'" stroke="#CCC" stroke-width="0.3"/>';
   for(var i=0;i<laid.length;i++){
     var rm=laid[i],z=zc(rm.type);
-    var aSqm=(rm.w/1000)*(rm.h/1000),aPy=(aSqm/3.306).toFixed(1);
+    var sw=rm.specW||rm.w,sh=rm.specH||rm.h;
+    var aSqm=(sw/1000)*(sh/1000),aPy=(aSqm/3.306).toFixed(1);
     var ry2=ly+20+i*12;
     o+='<rect x="'+(rsx-3)+'" y="'+(ry2-5)+'" width="6" height="6" rx="1" fill="'+z.bg+'" stroke="'+z.b+'" stroke-width="0.3"/>';
     o+='<text x="'+(rsx+6)+'" y="'+ry2+'" font-family="sans-serif" font-size="6" fill="#555">'+rm.name+'</text>';
