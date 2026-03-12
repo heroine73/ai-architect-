@@ -179,6 +179,12 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* Preset Buttons */
+.preset-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.preset-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;font-size:.75rem;font-weight:500;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;border-radius:16px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.preset-btn:hover{background:#e0f2fe;border-color:#7dd3fc;transform:translateY(-1px)}
+.preset-btn:active{transform:scale(.97)}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .container { grid-template-columns: 1fr; }
@@ -189,6 +195,10 @@ body {
   .card { padding: 16px; }
   .form-row { flex-direction: column; gap: 0; }
   .room-size-input { width: 60px; }
+  .preset-grid{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .preset-btn{flex-shrink:0}
+  .drag-handle{font-size:1.25rem;padding:8px 4px;min-width:32px;min-height:44px;display:flex;align-items:center;justify-content:center}
+  .btn-remove{min-width:32px;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:1rem}
 }
 </style>
 </head>
@@ -275,6 +285,20 @@ body {
 
     <div class="section-label">🏠 방 구성</div>
     <div id="roomSummary" style="font-size:0.8rem;color:var(--g500);margin-bottom:8px;"></div>
+    <div class="preset-grid" id="presetGrid">
+      <button type="button" class="preset-btn" onclick="addPreset('거실',5,4)">🛋️ 거실</button>
+      <button type="button" class="preset-btn" onclick="addPreset('안방',4,3.5)">🛏️ 안방</button>
+      <button type="button" class="preset-btn" onclick="addPreset('침실',3,3)">🛏️ 침실</button>
+      <button type="button" class="preset-btn" onclick="addPreset('주방',3,2.5)">🍳 주방</button>
+      <button type="button" class="preset-btn" onclick="addPreset('욕실',2,2)">🚿 욕실</button>
+      <button type="button" class="preset-btn" onclick="addPreset('현관',2,1.5)">🚪 현관</button>
+      <button type="button" class="preset-btn" onclick="addPreset('다용도실',2,2)">🧹 다용도실</button>
+      <button type="button" class="preset-btn" onclick="addPreset('드레스룸',2.5,2)">👔 드레스룸</button>
+      <button type="button" class="preset-btn" onclick="addPreset('서재',3,2.5)">📚 서재</button>
+      <button type="button" class="preset-btn" onclick="addPreset('발코니',4,1.5)">🌿 발코니</button>
+      <button type="button" class="preset-btn" onclick="addPreset('창고',2,1.5)">📦 창고</button>
+      <button type="button" class="preset-btn" onclick="addPreset('복도',4,1.2)">🚶 복도</button>
+    </div>
     <div id="roomList" class="room-list"></div>
     <div style="margin-top:12px">
       <button type="button" class="btn btn-add" onclick="addRoom()">＋ 방 추가</button>
@@ -349,11 +373,27 @@ function removeRoom(idx) {
   if (rooms.length <= 1) { alert('최소 1개의 방은 필요합니다.'); return; }
   rooms.splice(idx, 1);
   renderRooms();
+  autoRefreshPreview();
 }
 
+var refreshTimer = null;
 function updateRoom(idx, field, val) {
   rooms[idx][field] = val;
   updateRoomSummary();
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(autoRefreshPreview, 500);
+}
+
+function addPreset(name, width, height) {
+  addRoom(name, width, height);
+  var list = document.getElementById('roomList');
+  if (list.lastElementChild) list.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  autoRefreshPreview();
+}
+
+function autoRefreshPreview() {
+  if (!svgData && !document.querySelector('.preview-area svg')) return;
+  handleGenerate();
 }
 
 function escapeHtml(str) {
@@ -408,6 +448,7 @@ function renderRooms() {
         var moved = rooms.splice(dragSourceIndex, 1)[0];
         rooms.splice(i, 0, moved);
         renderRooms();
+        autoRefreshPreview();
       }
     });
 
