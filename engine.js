@@ -119,7 +119,7 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
   var cov=(bA/lA*100).toFixed(1),py=(bA/3.306).toFixed(1);
 
   // SVG
-  var svgW=px(lW)+PAD*2+90,svgH=px(lH)+PAD*2+75;
+  var svgW=px(lW)+PAD*2+120,svgH=px(lH)+PAD*2+100;
   var lx=PAD,ly=PAD+38;
   var ox=px(bX)+lx,oy=px(bY)+ly;
   var ewPx=px(EW),iwPx=px(IW);
@@ -247,11 +247,11 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
   }
 
   // 치수선 — 건물
-  o+=dimH(bxp,byp+bhp,bxp+bwp,(bW/1000).toFixed(1)+'m',16);
-  o+=dimV(bxp+bwp,byp,byp+bhp,(bH/1000).toFixed(1)+'m',16);
+  o+=dimH(bxp,byp+bhp,bxp+bwp,(bW/1000).toFixed(1)+'m',20);
+  o+=dimV(bxp+bwp,byp,byp+bhp,(bH/1000).toFixed(1)+'m',20);
   // 치수선 — 대지
-  o+=dimH(lx,ly+px(lH),lx+px(lW),lWm+'m',35);
-  o+=dimV(lx+px(lW),ly,ly+px(lH),lHm+'m',35);
+  o+=dimH(lx,ly+px(lH),lx+px(lW),lWm+'m',45);
+  o+=dimV(lx+px(lW),ly,ly+px(lH),lHm+'m',45);
 
   // 우측 방별 면적 표기
   var rsx=lx+px(lW)+48;
@@ -280,22 +280,22 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
 
 function dimH(x1,y,x2,label,off){
   var dy=y+off,s='';
-  s+='<line x1="'+x1+'" y1="'+y+'" x2="'+x1+'" y2="'+(dy+3)+'" stroke="#999" stroke-width="0.3"/>';
-  s+='<line x1="'+x2+'" y1="'+y+'" x2="'+x2+'" y2="'+(dy+3)+'" stroke="#999" stroke-width="0.3"/>';
-  s+='<line x1="'+x1+'" y1="'+dy+'" x2="'+x2+'" y2="'+dy+'" stroke="#333" stroke-width="0.5"/>';
-  s+='<line x1="'+x1+'" y1="'+(dy-3.5)+'" x2="'+x1+'" y2="'+(dy+3.5)+'" stroke="#333" stroke-width="0.8"/>';
-  s+='<line x1="'+x2+'" y1="'+(dy-3.5)+'" x2="'+x2+'" y2="'+(dy+3.5)+'" stroke="#333" stroke-width="0.8"/>';
-  s+='<text x="'+((x1+x2)/2)+'" y="'+(dy-4.5)+'" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#333" font-weight="600">'+label+'</text>';
+  s+='<line x1="'+x1+'" y1="'+y+'" x2="'+x1+'" y2="'+(dy+4)+'" stroke="#888" stroke-width="0.4"/>';
+  s+='<line x1="'+x2+'" y1="'+y+'" x2="'+x2+'" y2="'+(dy+4)+'" stroke="#888" stroke-width="0.4"/>';
+  s+='<line x1="'+x1+'" y1="'+dy+'" x2="'+x2+'" y2="'+dy+'" stroke="#222" stroke-width="0.7"/>';
+  s+='<line x1="'+x1+'" y1="'+(dy-4.5)+'" x2="'+x1+'" y2="'+(dy+4.5)+'" stroke="#222" stroke-width="1.2"/>';
+  s+='<line x1="'+x2+'" y1="'+(dy-4.5)+'" x2="'+x2+'" y2="'+(dy+4.5)+'" stroke="#222" stroke-width="1.2"/>';
+  s+='<text x="'+((x1+x2)/2)+'" y="'+(dy-6)+'" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#222" font-weight="700">'+label+'</text>';
   return s;
 }
 
 function dimV(x,y1,y2,label,off){
   var dx=x+off,s='',mid=(y1+y2)/2;
-  s+='<line x1="'+x+'" y1="'+y1+'" x2="'+(dx+3)+'" y2="'+y1+'" stroke="#999" stroke-width="0.3"/>';
-  s+='<line x1="'+x+'" y1="'+y2+'" x2="'+(dx+3)+'" y2="'+y2+'" stroke="#999" stroke-width="0.3"/>';
-  s+='<line x1="'+dx+'" y1="'+y1+'" x2="'+dx+'" y2="'+y2+'" stroke="#333" stroke-width="0.5"/>';
-  s+='<line x1="'+(dx-3.5)+'" y1="'+y1+'" x2="'+(dx+3.5)+'" y2="'+y1+'" stroke="#333" stroke-width="0.8"/>';
-  s+='<line x1="'+(dx-3.5)+'" y1="'+y2+'" x2="'+(dx+3.5)+'" y2="'+y2+'" stroke="#333" stroke-width="0.8"/>';
-  s+='<text x="'+(dx+3)+'" y="'+(mid+3)+'" text-anchor="start" font-family="sans-serif" font-size="9" fill="#333" font-weight="600" transform="rotate(-90,'+(dx+3)+','+(mid+3)+')">'+label+'</text>';
+  s+='<line x1="'+x+'" y1="'+y1+'" x2="'+(dx+4)+'" y2="'+y1+'" stroke="#888" stroke-width="0.4"/>';
+  s+='<line x1="'+x+'" y1="'+y2+'" x2="'+(dx+4)+'" y2="'+y2+'" stroke="#888" stroke-width="0.4"/>';
+  s+='<line x1="'+dx+'" y1="'+y1+'" x2="'+dx+'" y2="'+y2+'" stroke="#222" stroke-width="0.7"/>';
+  s+='<line x1="'+(dx-4.5)+'" y1="'+y1+'" x2="'+(dx+4.5)+'" y2="'+y1+'" stroke="#222" stroke-width="1.2"/>';
+  s+='<line x1="'+(dx-4.5)+'" y1="'+y2+'" x2="'+(dx+4.5)+'" y2="'+y2+'" stroke="#222" stroke-width="1.2"/>';
+  s+='<text x="'+(dx+4)+'" y="'+(mid+4)+'" text-anchor="start" font-family="sans-serif" font-size="13" fill="#222" font-weight="700" transform="rotate(-90,'+(dx+4)+','+(mid+4)+')">'+label+'</text>';
   return s;
 }
