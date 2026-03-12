@@ -129,8 +129,8 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
 
   // 타이틀
   o+='<rect x="'+(svgW/2-110)+'" y="3" width="220" height="28" rx="3" fill="#FFF" stroke="#E0DDD5" stroke-width="0.4" filter="url(#ds)"/>';
-  o+='<text x="'+(svgW/2)+'" y="15" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#333" font-weight="700">1F 평면도 — '+dir+'</text>';
-  o+='<text x="'+(svgW/2)+'" y="26" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#888">대지 '+lWm+'×'+lHm+'m ('+lA.toFixed(1)+'㎡) · 건축 '+bA.toFixed(1)+'㎡ ('+py+'평) · 건폐율 '+cov+'%</text>';
+  o+='<text x="'+(svgW/2)+'" y="16" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#222" font-weight="700">1F 평면도 — '+dir+'</text>';
+  o+='<text x="'+(svgW/2)+'" y="30" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#666">대지 '+lWm+'×'+lHm+'m ('+lA.toFixed(1)+'㎡) · 건축 '+bA.toFixed(1)+'㎡ ('+py+'평) · 건폐율 '+cov+'%</text>';
 
   // 대지 경계
   o+='<rect x="'+lx+'" y="'+ly+'" width="'+px(lW)+'" height="'+px(lH)+'" fill="none" stroke="#C0B8A8" stroke-width="0.5" stroke-dasharray="3,2"/>';
@@ -252,16 +252,16 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
 
   // 우측 방별 면적 표기
   var rsx=lx+px(lW)+48;
-  o+='<text x="'+rsx+'" y="'+(ly+8)+'" font-family="sans-serif" font-size="7" fill="#555" font-weight="600">면적표</text>';
-  o+='<line x1="'+(rsx-3)+'" y1="'+(ly+11)+'" x2="'+(rsx+35)+'" y2="'+(ly+11)+'" stroke="#CCC" stroke-width="0.3"/>';
+  o+='<text x="'+rsx+'" y="'+(ly+8)+'" font-family="sans-serif" font-size="9" fill="#333" font-weight="700">면적표</text>';
+  o+='<line x1="'+(rsx-3)+'" y1="'+(ly+12)+'" x2="'+(rsx+45)+'" y2="'+(ly+12)+'" stroke="#CCC" stroke-width="0.4"/>';
   for(var i=0;i<laid.length;i++){
     var rm=laid[i],z=zc(rm.type);
     var sw=rm.specW||rm.w,sh=rm.specH||rm.h;
     var aSqm=(sw/1000)*(sh/1000),aPy=(aSqm/3.306).toFixed(1);
-    var ry2=ly+20+i*12;
+    var ry2=ly+22+i*16;
     o+='<rect x="'+(rsx-3)+'" y="'+(ry2-5)+'" width="6" height="6" rx="1" fill="'+z.bg+'" stroke="'+z.b+'" stroke-width="0.3"/>';
-    o+='<text x="'+(rsx+6)+'" y="'+ry2+'" font-family="sans-serif" font-size="6" fill="#555">'+rm.name+'</text>';
-    o+='<text x="'+(rsx+6)+'" y="'+(ry2+7)+'" font-family="sans-serif" font-size="5" fill="#999">'+aPy+'평</text>';
+    o+='<text x="'+(rsx+8)+'" y="'+ry2+'" font-family="sans-serif" font-size="8" fill="#333" font-weight="500">'+rm.name+'</text>';
+    o+='<text x="'+(rsx+8)+'" y="'+(ry2+9)+'" font-family="sans-serif" font-size="7" fill="#777">'+aPy+'평</text>';
   }
 
   // 나침반
@@ -277,22 +277,22 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
 
 function dimH(x1,y,x2,label,off){
   var dy=y+off,s='';
-  s+='<line x1="'+x1+'" y1="'+y+'" x2="'+x1+'" y2="'+(dy+2)+'" stroke="#999" stroke-width="0.2"/>';
-  s+='<line x1="'+x2+'" y1="'+y+'" x2="'+x2+'" y2="'+(dy+2)+'" stroke="#999" stroke-width="0.2"/>';
-  s+='<line x1="'+x1+'" y1="'+dy+'" x2="'+x2+'" y2="'+dy+'" stroke="#555" stroke-width="0.4"/>';
-  s+='<line x1="'+x1+'" y1="'+(dy-2.5)+'" x2="'+x1+'" y2="'+(dy+2.5)+'" stroke="#555" stroke-width="0.6"/>';
-  s+='<line x1="'+x2+'" y1="'+(dy-2.5)+'" x2="'+x2+'" y2="'+(dy+2.5)+'" stroke="#555" stroke-width="0.6"/>';
-  s+='<text x="'+((x1+x2)/2)+'" y="'+(dy-3)+'" text-anchor="middle" font-family="sans-serif" font-size="6.5" fill="#555">'+label+'</text>';
+  s+='<line x1="'+x1+'" y1="'+y+'" x2="'+x1+'" y2="'+(dy+3)+'" stroke="#999" stroke-width="0.3"/>';
+  s+='<line x1="'+x2+'" y1="'+y+'" x2="'+x2+'" y2="'+(dy+3)+'" stroke="#999" stroke-width="0.3"/>';
+  s+='<line x1="'+x1+'" y1="'+dy+'" x2="'+x2+'" y2="'+dy+'" stroke="#333" stroke-width="0.5"/>';
+  s+='<line x1="'+x1+'" y1="'+(dy-3.5)+'" x2="'+x1+'" y2="'+(dy+3.5)+'" stroke="#333" stroke-width="0.8"/>';
+  s+='<line x1="'+x2+'" y1="'+(dy-3.5)+'" x2="'+x2+'" y2="'+(dy+3.5)+'" stroke="#333" stroke-width="0.8"/>';
+  s+='<text x="'+((x1+x2)/2)+'" y="'+(dy-4.5)+'" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#333" font-weight="600">'+label+'</text>';
   return s;
 }
 
 function dimV(x,y1,y2,label,off){
   var dx=x+off,s='',mid=(y1+y2)/2;
-  s+='<line x1="'+x+'" y1="'+y1+'" x2="'+(dx+2)+'" y2="'+y1+'" stroke="#999" stroke-width="0.2"/>';
-  s+='<line x1="'+x+'" y1="'+y2+'" x2="'+(dx+2)+'" y2="'+y2+'" stroke="#999" stroke-width="0.2"/>';
-  s+='<line x1="'+dx+'" y1="'+y1+'" x2="'+dx+'" y2="'+y2+'" stroke="#555" stroke-width="0.4"/>';
-  s+='<line x1="'+(dx-2.5)+'" y1="'+y1+'" x2="'+(dx+2.5)+'" y2="'+y1+'" stroke="#555" stroke-width="0.6"/>';
-  s+='<line x1="'+(dx-2.5)+'" y1="'+y2+'" x2="'+(dx+2.5)+'" y2="'+y2+'" stroke="#555" stroke-width="0.6"/>';
-  s+='<text x="'+(dx+2)+'" y="'+(mid+2)+'" text-anchor="start" font-family="sans-serif" font-size="6.5" fill="#555" transform="rotate(-90,'+(dx+2)+','+(mid+2)+')">'+label+'</text>';
+  s+='<line x1="'+x+'" y1="'+y1+'" x2="'+(dx+3)+'" y2="'+y1+'" stroke="#999" stroke-width="0.3"/>';
+  s+='<line x1="'+x+'" y1="'+y2+'" x2="'+(dx+3)+'" y2="'+y2+'" stroke="#999" stroke-width="0.3"/>';
+  s+='<line x1="'+dx+'" y1="'+y1+'" x2="'+dx+'" y2="'+y2+'" stroke="#333" stroke-width="0.5"/>';
+  s+='<line x1="'+(dx-3.5)+'" y1="'+y1+'" x2="'+(dx+3.5)+'" y2="'+y1+'" stroke="#333" stroke-width="0.8"/>';
+  s+='<line x1="'+(dx-3.5)+'" y1="'+y2+'" x2="'+(dx+3.5)+'" y2="'+y2+'" stroke="#333" stroke-width="0.8"/>';
+  s+='<text x="'+(dx+3)+'" y="'+(mid+3)+'" text-anchor="start" font-family="sans-serif" font-size="9" fill="#333" font-weight="600" transform="rotate(-90,'+(dx+3)+','+(mid+3)+')">'+label+'</text>';
   return s;
 }
