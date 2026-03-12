@@ -89,18 +89,32 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
       cx+=sw2;ri++;
     }
     var tw=row.items.reduce(function(s,i){return s+i.w;},0);
-    if(tw<inW){var ex=inW-tw;row.items.forEach(function(i){i.w+=Math.round(ex*(i.w/tw));});
+    if(tw<inW){var ex=inW-tw;
+      // 최대 1.5배까지만 확장 (방 1개일 때 과대 팽창 방지)
+      var maxEx=tw*0.5;
+      if(ex>maxEx)ex=maxEx;
+      row.items.forEach(function(i){i.w+=Math.round(ex*(i.w/tw));});
+      // 남는 공간은 중앙 정렬로 처리 (x 오프셋)
       var sm=row.items.reduce(function(s,i){return s+i.w;},0);
-      row.items[row.items.length-1].w+=(inW-sm);
-      var xx=0;row.items.forEach(function(i){i.x=xx;xx+=i.w;});
+      var pad=(inW-sm)/2;
+      var xx=pad>0?pad:0;
+      row.items.forEach(function(i){i.x=xx;xx+=i.w;});
     }
     rows.push(row);
   }
   var tH=rows.reduce(function(s,r){return s+r.h;},0);
-  if(tH<inH){var exH=inH-tH;rows.forEach(function(r){r.h+=Math.round(exH*(r.h/tH));});
-    var sH=rows.reduce(function(s,r){return s+r.h;},0);rows[rows.length-1].h+=(inH-sH);
+  if(tH<inH){var exH=inH-tH;
+    var maxExH=tH*0.5;
+    if(exH>maxExH)exH=maxExH;
+    rows.forEach(function(r){r.h+=Math.round(exH*(r.h/tH));});
+    var sH=rows.reduce(function(s,r){return s+r.h;},0);
+    // 세로도 중앙 정렬
+    var vpad=(inH-sH)/2;
+    var yy2=vpad>0?vpad:0;
+    rows.forEach(function(r){r.y=yy2;yy2+=r.h;});
+  } else {
+    var yy=0;rows.forEach(function(r){r.y=yy;yy+=r.h;});
   }
-  var yy=0;rows.forEach(function(r){r.y=yy;yy+=r.h;});
 
   var laid=[];
   rows.forEach(function(row,ri2){
