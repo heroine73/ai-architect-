@@ -31,7 +31,7 @@ body {
 .header {
   background: white; border-bottom: 1px solid var(--g200);
   padding: 16px 24px; text-align: center;
-  position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow);
+  position: sticky; top: 0; z-index: 10; box-shadow: var(--shadow);
 }
 .header h1 { font-size: 1.5rem; font-weight: 800; color: var(--g900); }
 .header p { font-size: 0.875rem; color: var(--g500); margin-top: 4px; }
@@ -190,10 +190,12 @@ body {
   .container { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
+  .header { position: relative; z-index: 1; }
   .header h1 { font-size: 1.2rem; }
   .container { padding: 0 12px; margin: 16px auto; gap: 16px; }
   .card { padding: 16px; }
   .form-row { flex-direction: column; gap: 0; }
+  .form-select, .form-input { font-size: 0.85rem; }
   .room-size-input { width: 60px; }
   .preset-grid{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
   .preset-btn{flex-shrink:0}
