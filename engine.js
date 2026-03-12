@@ -1,7 +1,7 @@
 // AI Architect — Client-Side Floor Plan Engine v4
 // 프레젠테이션급: 이중선 벽체, 가구심볼, 파스텔존, 치수선, 문arc
 
-var S=0.06,PAD=70,EW=200,IW=120,SETBK=1500;
+var S=0.08,PAD=70,EW=200,IW=120,SETBK=1500;
 var ZC={
   living:{bg:'#FFF8E7',b:'#E8D5A8'},bed:{bg:'#F0F4FF',b:'#B8C8E8'},
   kitchen:{bg:'#FFF3E0',b:'#E8C8A0'},bath:{bg:'#E8F5F0',b:'#A8D8C8'},
