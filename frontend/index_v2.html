@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Architect — 평면도 생성기 v2</title>
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db;
+  --g400: #9ca3af; --g500: #6b7280; --g600: #4b5563; --g700: #374151;
+  --g800: #1f2937; --g900: #111827;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+  background: var(--g100); color: var(--g800); line-height: 1.6;
+  min-height: 100vh;
+}
+
+.header {
+  background: white; border-bottom: 1px solid var(--g200);
+  padding: 16px 24px; text-align: center;
+  position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow);
+}
+.header h1 { font-size: 1.5rem; font-weight: 800; color: var(--g900); }
+.header p { font-size: 0.875rem; color: var(--g500); margin-top: 4px; }
+
+.container {
+  max-width: 1200px; margin: 24px auto; padding: 0 16px;
+  display: grid; grid-template-columns: 1fr 2fr; gap: 24px;
+}
+
+.card {
+  background: white; border-radius: var(--radius); padding: 24px;
+  box-shadow: var(--shadow); border: 1px solid var(--g200);
+}
+.card-title {
+  font-size: 1.125rem; font-weight: 700; color: var(--g900);
+  margin-bottom: 20px;
+}
+
+.section-label {
+  font-size: 0.9rem; font-weight: 700; color: var(--primary);
+  margin-bottom: 12px; margin-top: 4px;
+}
+.section-divider {
+  border: none; border-top: 1px solid var(--g200); margin: 20px 0;
+}
+
+.form-row { display: flex; gap: 12px; }
+.form-group { flex: 1; margin-bottom: 14px; }
+.form-label {
+  display: block; font-size: 0.8rem; font-weight: 600;
+  color: var(--g600); margin-bottom: 4px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--g300);
+  border-radius: 8px; font-size: 0.9rem; color: var(--g800);
+  background: white; transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+.form-textarea { min-height: 80px; resize: vertical; }
+
+/* Room List */
+.room-list { display: flex; flex-direction: column; gap: 8px; }
+.room-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; background: var(--g50);
+  border: 1px solid var(--g200); border-radius: 8px;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.room-item:hover { border-color: var(--g300); box-shadow: var(--shadow); }
+.room-item.dragging { opacity: 0.5; border-color: var(--primary); }
+.room-item.drag-over { border-color: var(--primary); background: var(--primary-light); }
+
+.room-number {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--primary); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+}
+.room-fields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.room-name-input {
+  width: 100%; padding: 6px 10px; border: 1px solid var(--g300);
+  border-radius: 6px; font-size: 0.85rem;
+}
+.room-name-input:focus { outline: none; border-color: var(--primary); }
+.room-size-row { display: flex; align-items: center; gap: 6px; }
+.room-size-input {
+  width: 80px; padding: 6px 8px; border: 1px solid var(--g300);
+  border-radius: 6px; font-size: 0.85rem; text-align: center;
+}
+.room-size-input:focus { outline: none; border-color: var(--primary); }
+.room-size-x { color: var(--g400); font-weight: 600; }
+.drag-handle { cursor: grab; color: var(--g400); font-size: 1.2rem; user-select: none; }
+.drag-handle:active { cursor: grabbing; }
+
+.btn-remove {
+  width: 28px; height: 28px; border: none; border-radius: 50%;
+  background: var(--danger); color: white; cursor: pointer;
+  font-size: 1rem; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.btn-remove:hover { background: var(--danger-hover); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 12px 20px; border: none; border-radius: 8px;
+  font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-primary {
+  width: 100%; background: var(--primary); color: white;
+  font-size: 1rem; padding: 14px;
+}
+.btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-add {
+  background: var(--g100); color: var(--g700); border: 1px dashed var(--g300);
+  width: 100%; padding: 10px;
+}
+.btn-add:hover { background: var(--g200); }
+.btn-download {
+  background: var(--success); color: white; padding: 8px 16px;
+  font-size: 0.8rem;
+}
+.btn-download:hover { filter: brightness(0.9); }
+
+/* Preview */
+.preview-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.preview-area {
+  min-height: 400px; border: 2px dashed var(--g200); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.preview-area svg { max-width: 100%; height: auto; }
+.preview-empty { text-align: center; color: var(--g400); padding: 40px; }
+.preview-empty .icon { font-size: 3rem; margin-bottom: 12px; }
+
+/* Error */
+.error-box {
+  background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
+  padding: 16px; margin-bottom: 16px; display: flex; gap: 12px;
+  align-items: flex-start;
+}
+.error-icon { font-size: 1.5rem; }
+.error-title { font-weight: 700; color: var(--danger); font-size: 0.9rem; }
+.error-msg { color: var(--g600); font-size: 0.85rem; margin-top: 4px; }
+.btn-retry {
+  margin-top: 8px; padding: 6px 14px; border: 1px solid var(--g300);
+  border-radius: 6px; background: white; cursor: pointer;
+  font-size: 0.8rem;
+}
+.btn-retry:hover { background: var(--g50); }
+
+/* Spinner */
+.spinner {
+  width: 40px; height: 40px; border: 4px solid var(--g200);
+  border-top-color: var(--primary); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .container { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .header h1 { font-size: 1.2rem; }
+  .container { padding: 0 12px; margin: 16px auto; gap: 16px; }
+  .card { padding: 16px; }
+  .form-row { flex-direction: column; gap: 0; }
+  .room-size-input { width: 60px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏠 AI Architect — 평면도 생성기</h1>
+  <p>대지 정보와 방 구성을 입력하면 AI가 최적의 평면도를 그려드립니다</p>
+</div>
+
+<div class="container">
+  <!-- Input Panel -->
+  <div class="card">
+    <div class="card-title">📝 건축 정보 입력</div>
+
+    <div class="section-label">📍 대지 정보</div>
+    <div class="form-group">
+      <label class="form-label" for="address">주소 / 지번</label>
+      <input type="text" id="address" class="form-input" placeholder="예: 이천시 신둔면 인후리 364-12">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="landArea">대지 면적 (㎡)</label>
+        <input type="number" id="landArea" class="form-input" placeholder="자동 계산" readonly tabindex="-1" style="background:var(--g50);">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="zoning">용도지역</label>
+        <select id="zoning" class="form-select">
+          <option value="">선택해주세요</option>
+          <option value="제1종전용주거지역">제1종전용주거지역</option>
+          <option value="제2종전용주거지역">제2종전용주거지역</option>
+          <option value="제1종일반주거지역">제1종일반주거지역</option>
+          <option value="제2종일반주거지역">제2종일반주거지역</option>
+          <option value="제3종일반주거지역">제3종일반주거지역</option>
+          <option value="준주거지역">준주거지역</option>
+          <option value="일반상업지역">일반상업지역</option>
+          <option value="근린상업지역">근린상업지역</option>
+          <option value="준공업지역">준공업지역</option>
+          <option value="자연녹지지역">자연녹지지역</option>
+          <option value="계획관리지역">계획관리지역</option>
+          <option value="농림지역">농림지역</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="bcr">건폐율 (%)</label>
+        <input type="number" id="bcr" class="form-input" placeholder="예: 60" min="0" max="100" step="1">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="far">용적률 (%)</label>
+        <input type="number" id="far" class="form-input" placeholder="예: 200" min="0" max="1500" step="1">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="landWidth">대지 가로 (m)</label>
+        <input type="number" id="landWidth" class="form-input" value="15" min="5" step="0.5" oninput="calcArea()">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="landHeight">대지 세로 (m)</label>
+        <input type="number" id="landHeight" class="form-input" value="20" min="5" step="0.5" oninput="calcArea()">
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="section-label">🧭 건물 방향</div>
+    <div class="form-group">
+      <label class="form-label" for="direction">향 (전면 기준)</label>
+      <select id="direction" class="form-select">
+        <option value="남향">남향</option>
+        <option value="남동향">남동향</option>
+        <option value="남서향">남서향</option>
+        <option value="동향">동향</option>
+        <option value="서향">서향</option>
+        <option value="북향">북향</option>
+        <option value="북동향">북동향</option>
+        <option value="북서향">북서향</option>
+      </select>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="section-label">🏠 방 구성</div>
+    <div id="roomSummary" style="font-size:0.8rem;color:var(--g500);margin-bottom:8px;"></div>
+    <div id="roomList" class="room-list"></div>
+    <div style="margin-top:12px">
+      <button type="button" class="btn btn-add" onclick="addRoom()">＋ 방 추가</button>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="section-label">💬 추가 요구사항</div>
+    <div class="form-group">
+      <textarea id="requirements" class="form-textarea" placeholder="예: 거실을 넓게, 주방과 거실 오픈형, 현관에 신발장 공간 확보"></textarea>
+    </div>
+
+    <button type="button" class="btn btn-primary" id="generateBtn" onclick="handleGenerate()">🏗️ 평면도 생성</button>
+  </div>
+
+  <!-- Preview Panel -->
+  <div class="card">
+    <div class="preview-header">
+      <div class="card-title" style="margin-bottom:0">📋 평면도 미리보기</div>
+      <button type="button" class="btn btn-download" id="downloadBtn" onclick="handleDownload()" style="display:none">📥 SVG 다운로드</button>
+    </div>
+    <div id="errorBox" class="error-box" style="display:none">
+      <span class="error-icon">⚠️</span>
+      <div>
+        <div class="error-title">도면 생성 실패</div>
+        <div class="error-msg" id="errorMsg"></div>
+        <button class="btn-retry" onclick="handleGenerate()">🔄 다시 시도</button>
+      </div>
+    </div>
+    <div id="previewArea" class="preview-area">
+      <div class="preview-empty">
+        <div class="icon">🏠</div>
+        <p>건축 정보를 입력하고</p>
+        <p>평면도를 생성해보세요</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== State =====
+var rooms = [];
+var svgData = null;
+var isLoading = false;
+var dragSourceIndex = null;
+
+// ===== Init =====
+(function init() {
+  addRoom('거실', 5, 4);
+  addRoom('안방', 4, 3.5);
+  addRoom('방1', 3, 3);
+  addRoom('주방', 3, 2.5);
+  addRoom('욕실', 2, 2);
+  calcArea();
+})();
+
+// ===== Calc Area =====
+function calcArea() {
+  var w = parseFloat(document.getElementById('landWidth').value) || 0;
+  var h = parseFloat(document.getElementById('landHeight').value) || 0;
+  var area = w * h;
+  document.getElementById('landArea').value = area > 0 ? area.toFixed(1) : '';
+}
+
+// ===== Room Management =====
+function addRoom(name, width, height) {
+  rooms.push({ id: Date.now() + Math.random(), name: name || '', width: width || '', height: height || '' });
+  renderRooms();
+}
+
+function removeRoom(idx) {
+  if (rooms.length <= 1) { alert('최소 1개의 방은 필요합니다.'); return; }
+  rooms.splice(idx, 1);
+  renderRooms();
+}
+
+function updateRoom(idx, field, val) {
+  rooms[idx][field] = val;
+  updateRoomSummary();
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+
+function updateRoomSummary() {
+  var totalArea = 0;
+  rooms.forEach(function(r) {
+    var w = parseFloat(r.width) || 0;
+    var h = parseFloat(r.height) || 0;
+    totalArea += w * h;
+  });
+  var landW = parseFloat(document.getElementById('landWidth').value) || 0;
+  var landH = parseFloat(document.getElementById('landHeight').value) || 0;
+  var landArea = landW * landH;
+  var ratio = landArea > 0 ? (totalArea / landArea * 100).toFixed(1) : 0;
+  var bcr = parseFloat(document.getElementById('bcr').value) || 0;
+  var warning = (bcr > 0 && ratio > bcr) ? ' ⚠️ 건폐율 초과!' : '';
+  document.getElementById('roomSummary').innerHTML =
+    '방 ' + rooms.length + '개 · 총 면적 ' + totalArea.toFixed(1) + '㎡' +
+    (landArea > 0 ? ' (' + ratio + '%)' : '') + warning;
+}
+
+function renderRooms() {
+  var list = document.getElementById('roomList');
+  list.innerHTML = '';
+  rooms.forEach(function(room, i) {
+    var item = document.createElement('div');
+    item.className = 'room-item';
+    item.draggable = true;
+    item.dataset.index = i;
+
+    item.addEventListener('dragstart', function(e) {
+      dragSourceIndex = i; item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', function() {
+      item.classList.remove('dragging'); dragSourceIndex = null;
+      document.querySelectorAll('.room-item').forEach(function(el){ el.classList.remove('drag-over'); });
+    });
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+      item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', function() { item.classList.remove('drag-over'); });
+    item.addEventListener('drop', function(e) {
+      e.preventDefault(); item.classList.remove('drag-over');
+      if (dragSourceIndex !== null && dragSourceIndex !== i) {
+        var moved = rooms.splice(dragSourceIndex, 1)[0];
+        rooms.splice(i, 0, moved);
+        renderRooms();
+      }
+    });
+
+    item.innerHTML =
+      '<span class="room-number">' + (i+1) + '</span>' +
+      '<div class="room-fields">' +
+        '<input type="text" class="room-name-input" value="' + escapeHtml(room.name) + '" placeholder="방 이름 (예: 안방, 거실)" onchange="updateRoom('+i+',\'name\',this.value)">' +
+        '<div class="room-size-row">' +
+          '<input type="number" class="room-size-input" value="'+room.width+'" placeholder="가로(m)" min="1" step="0.5" onchange="updateRoom('+i+',\'width\',this.value)">' +
+          '<span class="room-size-x">&times;</span>' +
+          '<input type="number" class="room-size-input" value="'+room.height+'" placeholder="세로(m)" min="1" step="0.5" onchange="updateRoom('+i+',\'height\',this.value)">' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:4px">' +
+        '<span class="drag-handle" title="드래그하여 순서 변경">⠿</span>' +
+        '<button type="button" class="btn-remove" onclick="removeRoom('+i+')" title="삭제">&times;</button>' +
+      '</div>';
+    list.appendChild(item);
+  });
+  updateRoomSummary();
+}
+
+// ===== Generate =====
+function handleGenerate() {
+  if (isLoading) return;
+
+  var address = document.getElementById('address').value.trim();
+  var landArea = parseFloat(document.getElementById('landArea').value) || null;
+  var zoning = document.getElementById('zoning').value;
+  var bcr = parseFloat(document.getElementById('bcr').value) || null;
+  var far = parseFloat(document.getElementById('far').value) || null;
+  var landWidth = parseFloat(document.getElementById('landWidth').value);
+  var landHeight = parseFloat(document.getElementById('landHeight').value);
+  var direction = document.getElementById('direction').value;
+  var requirements = document.getElementById('requirements').value.trim();
+
+  if (!landWidth || !landHeight) { showError('대지 가로/세로 크기를 입력해주세요.'); return; }
+  if (rooms.length === 0) { showError('최소 1개의 방을 추가해주세요.'); return; }
+
+  // Validate rooms
+  for (var r = 0; r < rooms.length; r++) {
+    if (!rooms[r].name.trim()) { showError((r+1) + '번째 방 이름을 입력해주세요.'); return; }
+    var rw = parseFloat(rooms[r].width), rh = parseFloat(rooms[r].height);
+    if (!rw || rw <= 0 || !rh || rh <= 0) { showError((r+1) + '번째 방(' + rooms[r].name + ')의 치수를 확인해주세요.'); return; }
+  }
+
+  // BCR check
+  if (bcr) {
+    var totalRoomArea = 0;
+    rooms.forEach(function(rm) { totalRoomArea += (parseFloat(rm.width)||0) * (parseFloat(rm.height)||0); });
+    var maxArea = landWidth * landHeight * bcr / 100;
+    if (totalRoomArea > maxArea) {
+      showError('건폐율 초과! 방 합계 ' + totalRoomArea.toFixed(1) + '㎡ > 허용 ' + maxArea.toFixed(1) + '㎡ (' + bcr + '%)');
+      return;
+    }
+  }
+
+  var roomDesc = rooms.map(function(rm) {
+    var p = [];
+    if (rm.name) p.push(rm.name);
+    if (rm.width && rm.height) p.push(rm.width + 'm×' + rm.height + 'm');
+    return p.join(' ');
+  }).filter(Boolean).join(', ');
+
+  var fullReq = '방 구성: ' + roomDesc;
+  if (address) fullReq += '. 주소: ' + address;
+  if (landArea) fullReq += '. 대지면적: ' + landArea + '㎡';
+  if (zoning) fullReq += '. 용도지역: ' + zoning;
+  if (bcr) fullReq += '. 건폐율: ' + bcr + '%';
+  if (far) fullReq += '. 용적률: ' + far + '%';
+  if (requirements) fullReq += '. ' + requirements;
+
+  setLoading(true);
+  hideError();
+  svgData = null;
+  updateDownloadBtn();
+
+  var body = {
+    landWidth: landWidth,
+    landHeight: landHeight,
+    direction: direction,
+    requirements: fullReq,
+    floors: 1,
+    roomCount: rooms.length,
+    rooms: rooms.map(function(rm) {
+      return { name: rm.name, width: parseFloat(rm.width)||0, height: parseFloat(rm.height)||0 };
+    })
+  };
+
+  fetch('http://localhost:3001/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    setLoading(false);
+    if (data.success && data.svg) {
+      svgData = data.svg;
+      showSvg(data.svg);
+    } else {
+      showError(data.error || '도면 생성에 실패했습니다.');
+    }
+  })
+  .catch(function(err) {
+    setLoading(false);
+    showError('서버 연결에 실패했습니다. 백엔드가 실행 중인지 확인해주세요.');
+  });
+}
+
+// ===== UI Helpers =====
+function setLoading(on) {
+  isLoading = on;
+  var btn = document.getElementById('generateBtn');
+  var preview = document.getElementById('previewArea');
+  if (on) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="width:20px;height:20px;border-width:3px;margin:0 8px 0 0"></span> 도면 생성 중...';
+    preview.innerHTML = '<div style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto 16px"></div><p style="color:var(--g500);font-size:1rem">AI가 평면도를 그리고 있어요...</p><p style="color:var(--g400);font-size:.875rem;margin-top:4px">잠시만 기다려주세요</p></div>';
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = '🏗️ 평면도 생성';
+  }
+}
+
+function showSvg(svg) {
+  var preview = document.getElementById('previewArea');
+  preview.innerHTML = '<div style="padding:16px;width:100%">' + svg + '</div>';
+  updateDownloadBtn();
+}
+
+function showError(msg) {
+  document.getElementById('errorBox').style.display = 'flex';
+  document.getElementById('errorMsg').textContent = msg;
+}
+
+function hideError() {
+  document.getElementById('errorBox').style.display = 'none';
+}
+
+function updateDownloadBtn() {
+  document.getElementById('downloadBtn').style.display = svgData ? 'inline-flex' : 'none';
+}
+
+function handleDownload() {
+  if (!svgData) return;
+  var blob = new Blob([svgData], { type: 'image/svg+xml' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'floorplan.svg';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
