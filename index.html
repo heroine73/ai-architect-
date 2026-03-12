@@ -498,13 +498,21 @@ function handleGenerate() {
     if (!rooms[r].name.trim()) { showError((r+1) + '번째 방 이름을 입력해주세요.'); return; }
     var rw = parseFloat(rooms[r].width), rh = parseFloat(rooms[r].height);
     if (!rw || rw <= 0 || !rh || rh <= 0) { showError((r+1) + '번째 방(' + rooms[r].name + ')의 치수를 확인해주세요.'); return; }
+    if (rw > landWidth || rh > landHeight) { showError((r+1) + '번째 방(' + rooms[r].name + ') 크기가 대지보다 큽니다. (' + rw + '×' + rh + 'm > ' + landWidth + '×' + landHeight + 'm)'); return; }
+  }
+
+  // 대지 면적 초과 체크
+  var totalRoomArea = 0;
+  rooms.forEach(function(rm) { totalRoomArea += (parseFloat(rm.width)||0) * (parseFloat(rm.height)||0); });
+  var landTotalArea = landWidth * landHeight;
+  if (totalRoomArea > landTotalArea) {
+    showError('⚠️ 방 합계(' + totalRoomArea.toFixed(1) + '㎡)가 대지 면적(' + landTotalArea.toFixed(1) + '㎡)을 초과합니다. 방 크기를 줄여주세요.');
+    return;
   }
 
   // BCR check
   if (bcr) {
-    var totalRoomArea = 0;
-    rooms.forEach(function(rm) { totalRoomArea += (parseFloat(rm.width)||0) * (parseFloat(rm.height)||0); });
-    var maxArea = landWidth * landHeight * bcr / 100;
+    var maxArea = landTotalArea * bcr / 100;
     if (totalRoomArea > maxArea) {
       showError('건폐율 초과! 방 합계 ' + totalRoomArea.toFixed(1) + '㎡ > 허용 ' + maxArea.toFixed(1) + '㎡ (' + bcr + '%)');
       return;

@@ -112,7 +112,10 @@ function generateFloorPlanLocal(lWm,lHm,dir,specs){
     });
   });
 
-  var bA=(bW/1000)*(bH/1000),lA=lWm*lHm;
+  // 실제 방 합계 면적 (입력 치수 기준)
+  var roomTotalSqm=0;
+  for(var i=0;i<specs.length;i++) roomTotalSqm+=specs[i].width*specs[i].height;
+  var bA=roomTotalSqm,lA=lWm*lHm;
   var cov=(bA/lA*100).toFixed(1),py=(bA/3.306).toFixed(1);
 
   // SVG
